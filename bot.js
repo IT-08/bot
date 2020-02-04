@@ -60,24 +60,14 @@ bot.use(async (ctx, next) => {
   })
 
   const group = await Group.findAll({
-    // include: [{
-    //   model: Student,
-    //   attributes: ['group_id'],
-    // }],
     attributes: [
       'id',
       [sequelize.literal('(SELECT COUNT(*) FROM "Students" WHERE "Students".group_id = "Group".id)'), 'StudentsCount'],
     ],
-    // attributes: [
-    //   'id',
-    //   [sequelize.literal('(SELECT COUNT(*) FROM Students WHERE Students.group_id = Group.id)'), 'StudentsCount']
-    // ],
-    // where: { 'StudentsCount': { [Op.lt]: 25 } },
-    // order: ['"StudentsCount"', 'DESC'],
-    limit: 1,
+    raw: true,
   });
 
-  console.log(group);
+  console.log(group.filter(el => parseInt(el.StudentsCount) < 25));
 
   if (!user) {
     const createdUser = await Student.create(
