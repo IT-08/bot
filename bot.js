@@ -7,7 +7,8 @@ const axios = require('axios')
 
 
 const { leave } = Stage
-const { sequelize, GitActivity, Student } = require('./models')
+const { Sequelize, sequelize, GitActivity, Student, Group } = require('./models')
+const Op = Sequelize.Op
 
 const registration = new WizardScene(
   'registration',
@@ -58,11 +59,32 @@ bot.use(async (ctx, next) => {
     raw: true,
   })
 
+  const group = await Group.findAll({
+    // include: [{
+    //   model: Student,
+    //   attributes: ['group_id'],
+    // }],
+    attributes: [
+      'id',
+      [sequelize.literal('(SELECT COUNT(*) FROM "Students" WHERE "Students".group_id = "Group".id)'), 'StudentsCount'],
+    ],
+    // attributes: [
+    //   'id',
+    //   [sequelize.literal('(SELECT COUNT(*) FROM Students WHERE Students.group_id = Group.id)'), 'StudentsCount']
+    // ],
+    // where: { 'StudentsCount': { [Op.lt]: 25 } },
+    // order: ['"StudentsCount"', 'DESC'],
+    limit: 1,
+  });
+
+  console.log(group);
+
   if (!user) {
     const createdUser = await Student.create(
       {
         chat_id: chatId,
         user_id: userId,
+        group_id: group[0].id,
         info: {
           status: 'unknown',
           stage: 'acknowledge',

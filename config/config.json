@@ -1,9 +1,9 @@
 {
   "development": {
     "username": "academy",
-    "password": "CNccyyhyNB9C6mzh",
-    "database": "academy_db",
-    "host": "localhost",
+    "password": "12345678",
+    "database": "academy",
+    "host": "db",
     "dialect": "postgres",
     "operatorsAliases": false
   },

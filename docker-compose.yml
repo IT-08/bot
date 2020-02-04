@@ -22,6 +22,7 @@ services:
       - PORT=9081
       - DEBUG=false #sequelize for stage DB
       - NODE_ENV=development #development for stage DB
+      - BOT_TOKEN=1042615895:AAGqpU6t8QzrlMWarMseENnIQ_QXK_5kAtY
     volumes:
       - ./:/srv/fund
     links:
