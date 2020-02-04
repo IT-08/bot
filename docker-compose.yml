@@ -1,0 +1,31 @@
+version: '3'
+services:
+
+  db:
+    image: postgres:10
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgresdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=academy
+      - POSTGRES_PASSWORD=12345678
+      - POSTGRES_DB=academy
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - PORT=9081
+      - DEBUG=false #sequelize for stage DB
+      - NODE_ENV=development #development for stage DB
+    volumes:
+      - ./:/srv/fund
+    links:
+      - db:pg_database
+    depends_on:
+      - db
+
