@@ -5,10 +5,12 @@ const WizardScene = require('telegraf/scenes/wizard');
 const session = require('telegraf/session')
 const axios = require('axios')
 
+const createUser = require('./actions/createUser')
+const getChatLink = require('./actions/getChatLink')
+
 
 const { leave } = Stage
-const { Sequelize, sequelize, GitActivity, Student, Group } = require('./models')
-const Op = Sequelize.Op
+const { GitActivity, Student } = require('./models')
 
 const registration = new WizardScene(
   'registration',
@@ -24,6 +26,7 @@ const registration = new WizardScene(
       ctx.info = { ...ctx.info, github_account: ctx.message.text }
       console.log(ctx.info)
       ctx.reply(`Ваши данные были успешно сохранены.`);
+      ctx.reply(`Присоединяйтесь к чату вашей группы ${ctx.info.chatLink}`);
       return ctx.scene.leave();
     } catch (e) {
       console.error(e)
@@ -51,42 +54,11 @@ bot.use(async (ctx, next) => {
   const userId = ctx.from.id
   const chatId = ctx.chat.id
 
-  let user =  await Student.findOne({
-    where: {
-      user_id: userId + '',
-      chat_id: chatId + ''
-    },
-    raw: true,
-  })
-
-  const group = await Group.findAll({
-    attributes: [
-      'id',
-      [sequelize.literal('(SELECT COUNT(*) FROM "Students" WHERE "Students".group_id = "Group".id)'), 'StudentsCount'],
-    ],
-    raw: true,
-  });
-
-  console.log(group.filter(el => parseInt(el.StudentsCount) < 25));
-
-  if (!user) {
-    const createdUser = await Student.create(
-      {
-        chat_id: chatId,
-        user_id: userId,
-        group_id: group[0].id,
-        info: {
-          status: 'unknown',
-          stage: 'acknowledge',
-        }
-      }
-    )
-
-    user = createdUser.get()
-  }
+  const user = await createUser({ userId, chatId })
+  const chatLink = await getChatLink({ groupId: user.group_id })
 
   ctx.user = user
-  ctx.info = ctx.user.info
+  ctx.info = { ...ctx.user.info, chatLink }
   console.log('before next')
   await next()
 

@@ -8,7 +8,7 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      tg_link: {
+      tg_chat: {
         allowNull: false,
         type: Sequelize.STRING
       },
